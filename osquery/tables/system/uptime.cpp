@@ -21,6 +21,7 @@
 #endif
 
 namespace osquery {
+	
 namespace tables {
 
 long getUptime() {
@@ -52,6 +53,46 @@ long getUptime() {
   return -1;
 }
 
+int getBootTime (long uptime_in_seconds) {
+	const int SECS_PER_DAY = 86400;
+	time_t local_time = getUnixTime();
+
+	struct tm now;
+	localtime_r(&local_time, &now);
+	
+	int current_day_in_seconds = ( 0 + now.tm_sec + (now.tm_sec * 60) + (now.tm_hour * 60 *60));
+		
+	int boot_time_in_seconds;
+	int num_of_past_days = 0;
+		
+	if (uptime_in_seconds <= current_day_in_seconds) {
+		//last_bootup occured on the same day as the query
+		boot_time_in_seconds = current_day_in_seconds - uptime_in_seconds;
+	} else if (uptime_in_seconds > current_day_in_seconds) {
+		//last_bootup occured on a past day
+		
+		//Count how many days have gone by since last_bootup
+		while ((uptime_in_seconds - (num_of_past_days * SECS_PER_DAY)) > SECS_PER_DAY) {
+			num_of_past_days++;
+		}
+		
+		//leftover seconds under 86,400 (1 day)
+		int leftover_seconds = (uptime_in_seconds - (num_of_past_days * SECS_PER_DAY));
+		
+		if (leftover_seconds > current_day_in_seconds) {
+			leftover_seconds = leftover_seconds - current_day_in_seconds;
+			num_of_past_days++;
+			boot_time_in_seconds = SECS_PER_DAY - leftover_seconds;
+		} else if (leftover_seconds < current_day_in_seconds) {
+			boot_time_in_seconds = current_day_in_seconds - leftover_seconds;
+		}
+		//By now, boot_time_in_seconds is the time converted into seconds on the day
+		//that the bootup occured.
+		//Be sure to include the num_of_past_days if applicable;
+	}
+	return boot_time_in_seconds;
+}
+
 QueryData genUptime(QueryContext& context) {
   Row r;
   QueryData results;
@@ -63,6 +104,7 @@ QueryData genUptime(QueryContext& context) {
     r["minutes"] = INTEGER((uptime_in_seconds / 60) % 60);
     r["seconds"] = INTEGER(uptime_in_seconds % 60);
     r["total_seconds"] = BIGINT(uptime_in_seconds);
+	r["last_bootup"] = INTEGER(getBootTime(uptime_in_seconds));
     results.push_back(r);
   }
 

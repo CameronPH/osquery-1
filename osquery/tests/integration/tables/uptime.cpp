@@ -22,7 +22,8 @@ TEST_F(UptimeTests, test_sanity) {
                             {"hours", IntMinMaxCheck(0, 24)},
                             {"minutes", IntMinMaxCheck(0, 60)},
                             {"seconds", IntMinMaxCheck(0, 60)},
-                            {"total_seconds", NonNegativeInt}};
+                            {"total_seconds", NonNegativeInt},
+							{"last_bootup", NonNegativeInt}};
 
   validate_rows(data, row_map);
 }

@@ -6,5 +6,6 @@ schema([
     Column("minutes", INTEGER, "Minutes of uptime"),
     Column("seconds", INTEGER, "Seconds of uptime"),
     Column("total_seconds", BIGINT, "Total uptime seconds"),
+	Column("last_bootup", INTEGER, "Time of last bootup"),
 ])
 implementation("system/uptime@genUptime")

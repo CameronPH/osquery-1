@@ -57,8 +57,8 @@ QueryData genCpuInfo(QueryContext& context) {
         ? r["max_clock_speed"] = INTEGER(number)
         : r["max_clock_speed"] = "-1";
 	(data.GetLong("LoadPercentage", number))
-        ? r["cpu_utilization"] = INTEGER(number)
-        : r["cpu_utilization"] = "-1";
+        ? r["load_percentage"] = INTEGER(number)
+        : r["load_percentage"] = "-1";
     results.push_back(r);
   }
 
